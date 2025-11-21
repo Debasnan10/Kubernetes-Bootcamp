@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: debasnan-dep1
+  name: debasnan-dep1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debasnan-dep1
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: debasnan-dep1
+    spec:
+      imagePullSecrets:
+      - name: debasnan-acr-creds
+      containers:
+      - image: rocheashutoshh.azurecr.io/debasnanwebapp:v1health
+        name: debasnanwebapp
+        resources: {}
+        readinessProbe: 
+          httpGet: 
+            path: /health.html
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 5
+status: {}

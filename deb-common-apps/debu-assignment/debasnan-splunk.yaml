@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: debasnansplunkns
+spec: {}
+status: {}
+---
+apiVersion: v1
+data:
+  splunkpass: c3VwZXJzZWNyZXRwYXNzd29yZA==
+kind: Secret
+metadata:
+  namespace: debasnansplunkns
+  name: splunk-secret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: debasnansplunkns
+  labels:
+    app: debasnan-splunk-deploy
+  name: debasnan-splunk-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debasnan-splunk-deploy
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: debasnan-splunk-deploy
+    spec:
+      containers:
+      - image: splunk/splunk
+        name: splunk
+        env:
+        - name: SPLUNK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: splunk-secret
+              key: splunkpass
+        - name: SPLUNK_GENERAL_TERMS
+          value: --accept-sgt-current-at-splunk-com
+        - name : SPLUNK_START_ARGS
+          value: --accept-license
+        ports:
+        - containerPort: 8000
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: debasnansplunkns
+  labels:
+    app: debasnan-splunk-svc
+  name: debasnan-splunk-svc
+spec:
+  ports:
+  - name: 80-8000
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: debasnan-splunk-deploy
+  type: ClusterIP
+status:
+  loadBalancer: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: debasnansplunkns
+  name: debasnan-splunk-ingress-rule # name of my routing rule
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx #we are using nginx ingress controller
+  rules:
+  - host: roche-ashu.delvex.io
+    http:
+      paths:
+      - path: /debasnan-splunk
+        pathType: Prefix
+        backend:
+          service:
+            name: debasnan-splunk-svc
+            port:
+              number: 80

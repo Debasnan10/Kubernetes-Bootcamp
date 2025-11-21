@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: debu-db
+  name: debu-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debu-db
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: debu-db
+    spec:
+      containers:
+      - image: mysql
+        name: mysql
+        ports:
+        - containerPort: 3306
+        resources:
+          requests:
+            memory: 300M
+            cpu: 200m 
+          limits:
+            memory: 600M
+            cpu: 600M
+        env: #calling env from dockerfile to fill details
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: debu-db-secret
+              key: myrootpass
+        - name: MYSQL_DATABASE
+          valueFrom :
+            configMapKeyRef:
+              name: debu-db-config
+              key: mydbname
+status: {}

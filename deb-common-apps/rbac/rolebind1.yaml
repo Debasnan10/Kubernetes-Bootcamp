@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: debasnan-bind1
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: debasnan-role2
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: debu-project
